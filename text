@@ -1,0 +1,47 @@
+引言： 同一种语言JavaScript，在不同的浏览器中，存在语言兼容性问题，本质上是由于不同的浏览器是支持的语言标准和实现上各有差异。本文将基于new Date来创建Date对象来分析这个问题。
+
+1.  问题的提出， 开始时间和结束时间空间无法正确的传递值
+
+    在页面中，我们使用了一个时间上的组件来开发时间选择框，但是发现在Firefox下是无法正常工作的，在Chrome下是可以正常运行的。 问题出在哪里呢？
+
+2.  问题分析
+
+    结果分析发现是由于如下代码产生的问题：  
+
+[html] view plain copy 在CODE上查看代码片派生到我的代码片
+var timestart = '2010-05-04';  
+var timeend = '2015-04-01';  
+var time1 = (timestart+' 00:00:00').toString();  
+var time2 = (timeend+' 23:59:59').toString();  
+timestart = new Date(time1);  
+timeend = new Date(time2);  
+  问题就在于 new Date(time1)这个构造函数无法正确的生成Date对象，其值为NaN. 怪哉，问题在哪里呢？
+
+3. 各个浏览器上的表现
+
+  在IE下的执行情况：
+
+  
+
+ 在Firefox下的执行情况：
+    在Chrome下的执行情况：
+
+   
+
+    通过以上的分析，可以得知，这个javascript的脚本在Chrome下是可以正确执行的，但是在其他浏览器下报出错误。
+
+4. 正确的做法
+
+   以下列出正确的做法：
+
+[html] view plain copy 在CODE上查看代码片派生到我的代码片
+var time1 = (timestart+' 00:00:00').toString();  
+var time2 = (timeend+' 23:59:59').toString();  
+timestart = new Date(Date.parse(str.replace(/-/g,"/"))).getTime();  
+timeend = new Date(Date.parse(str.replace(/-/g,"/"))).getTime();  
+  主要的变化是对默认的日期格式进行了转换， 基于'/'格式的日期字符串，才是被各个浏览器所广泛支持的，‘-’连接的日期字符串，则是只在chrome下可以正常工作。
+5. 知识点总结
+
+   '2015-05-04'是无法被各个浏览器中，使用new Date(str)来正确生成日期对象的。 正确的用法是'2015/05/05'.  
+   
+   转自http://blog.csdn.net/blueheart20/article/details/44902747
